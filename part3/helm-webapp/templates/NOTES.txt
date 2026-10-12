@@ -1,0 +1,8 @@
+{{ .Chart.Name }} is deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Pods (expect {{ .Values.web.replicaCount }} web pods at 1/1 and one {{ include "webapp.dbFullname" . }}-0 pod at 1/1):
+  kubectl -n {{ .Release.Namespace }} get pods -L app.kubernetes.io/component
+
+Open the app:
+  http://{{ include "webapp.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local   (OrbStack)
+  or: kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "webapp.fullname" . }} 8080:{{ .Values.service.port }}
