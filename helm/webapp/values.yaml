@@ -5,13 +5,17 @@
 # Title shown at the top of the web page (great for testing GitOps changes)
 appTitle: "My Team Directory"
 
-# Keep at 1: Postgres lives inside the pod and uses a ReadWriteOnce volume.
-replicaCount: 1
+# Image shown under the table.
+#   - a file name in app/static/ (e.g. "team.svg"), or
+#   - a full URL (e.g. "https://example.com/picture.jpg")
+bannerImage: "team.svg"
 
 web:
+  # The web pod is now stateless (no database inside), so we can run several.
+  replicaCount: 2
   image:
     repository: webapp        # the image you built locally with OrbStack
-    tag: "1.0.0"              # don't use "latest" (it forces imagePullPolicy=Always)
+    tag: "1.1.0"              # don't use "latest" (it forces imagePullPolicy=Always)
     pullPolicy: IfNotPresent  # OrbStack's Kubernetes can use local Docker images
   port: 8000
   resources:
@@ -19,6 +23,7 @@ web:
     limits:   { cpu: 500m, memory: 256Mi }
 
 db:
+  # The database now runs in its OWN pod, managed by a StatefulSet.
   image:
     repository: postgres
     tag: "16-alpine"
@@ -29,12 +34,10 @@ db:
   resources:
     requests: { cpu: 50m, memory: 128Mi }
     limits:   { cpu: 500m, memory: 512Mi }
-
-persistence:
-  enabled: true
-  size: 1Gi
-  storageClass: ""            # "" = cluster default (local-path on OrbStack)
-  keepOnUninstall: true       # PVC survives `helm uninstall` so your data isn't lost
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: ""          # "" = cluster default (local-path on OrbStack)
 
 service:
   type: ClusterIP             # change to LoadBalancer to reach it on localhost in OrbStack
