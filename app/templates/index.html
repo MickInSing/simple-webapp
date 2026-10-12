@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='logo.svg') }}" alt="App logo" class="logo">
+    <h1>{{ title }}</h1>
+  </header>
+
+  <main>
+    <h2>Add a person</h2>
+    <form action="{{ url_for('add') }}" method="post" class="add-form">
+      <input name="name" placeholder="Name *" required>
+      <input name="email" type="email" placeholder="Email">
+      <input name="role" placeholder="Role">
+      <input name="department" placeholder="Department">
+      <input name="location" placeholder="Location">
+      <input name="start_date" type="date" title="Start date">
+      <button type="submit">Add</button>
+    </form>
+
+    <h2>People ({{ rows|length }})</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          {% for f in fields %}<th>{{ f.replace('_', ' ').title() }}</th>{% endfor %}
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ r.id }}</td>
+          {% for f in fields %}<td>{{ r[f] or '' }}</td>{% endfor %}
+          <td class="actions">
+            <a href="{{ url_for('edit', row_id=r.id) }}">Edit</a>
+            <form action="{{ url_for('delete', row_id=r.id) }}" method="post"
+                  onsubmit="return confirm('Delete this row?');">
+              <button type="submit" class="danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="{{ fields|length + 2 }}" class="empty">No rows yet. Add one above.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

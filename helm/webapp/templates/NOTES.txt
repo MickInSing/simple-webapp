@@ -1,0 +1,8 @@
+{{ .Chart.Name }} is deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Open the app:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "webapp.fullname" . }} 8080:{{ .Values.service.port }}
+  then browse to http://localhost:8080
+
+Check both containers are running (READY should say 2/2):
+  kubectl -n {{ .Release.Namespace }} get pods

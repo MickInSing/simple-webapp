@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------
+# values.yaml – the knobs you change. Templates read these values.
+# ---------------------------------------------------------------
+
+# Title shown at the top of the web page (great for testing GitOps changes)
+appTitle: "My Team Directory"
+
+# Keep at 1: Postgres lives inside the pod and uses a ReadWriteOnce volume.
+replicaCount: 1
+
+web:
+  image:
+    repository: webapp        # the image you built locally with OrbStack
+    tag: "1.0.0"              # don't use "latest" (it forces imagePullPolicy=Always)
+    pullPolicy: IfNotPresent  # OrbStack's Kubernetes can use local Docker images
+  port: 8000
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits:   { cpu: 500m, memory: 256Mi }
+
+db:
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  name: appdb
+  user: appuser
+  password: changeme          # learning only! Use a real secret manager for production.
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""            # "" = cluster default (local-path on OrbStack)
+  keepOnUninstall: true       # PVC survives `helm uninstall` so your data isn't lost
+
+service:
+  type: ClusterIP             # change to LoadBalancer to reach it on localhost in OrbStack
+  port: 80

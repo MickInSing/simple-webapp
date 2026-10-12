@@ -1,0 +1,25 @@
+# Tells Argo CD: "keep the cluster in sync with the Helm chart in my Git repo".
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/YOUR_GITHUB_USER/webapp.git   # <-- CHANGE THIS
+    targetRevision: main
+    path: helm/webapp
+    helm:
+      releaseName: webapp
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc   # the cluster Argo CD runs in
+    namespace: webapp
+  syncPolicy:
+    automated:
+      prune: true      # delete resources removed from Git
+      selfHeal: true   # undo manual changes made with kubectl
+    syncOptions:
+      - CreateNamespace=true

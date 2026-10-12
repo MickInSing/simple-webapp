@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- A simple original "stacked containers" illustration -->
+  <circle cx="60" cy="60" r="58" fill="#3b6ef5"/>
+  <rect x="26" y="70" width="68" height="20" rx="3" fill="#ffb547"/>
+  <rect x="32" y="48" width="56" height="20" rx="3" fill="#4fd1a5"/>
+  <rect x="38" y="26" width="44" height="20" rx="3" fill="#ffffff"/>
+  <g stroke="#1d2a4d" stroke-width="2" opacity="0.35">
+    <line x1="40" y1="72" x2="40" y2="88"/><line x1="54" y1="72" x2="54" y2="88"/>
+    <line x1="68" y1="72" x2="68" y2="88"/><line x1="82" y1="72" x2="82" y2="88"/>
+    <line x1="46" y1="50" x2="46" y2="66"/><line x1="60" y1="50" x2="60" y2="66"/>
+    <line x1="74" y1="50" x2="74" y2="66"/>
+    <line x1="52" y1="28" x2="52" y2="44"/><line x1="68" y1="28" x2="68" y2="44"/>
+  </g>
+</svg>

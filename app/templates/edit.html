@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit #{{ row.id }} – {{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='logo.svg') }}" alt="App logo" class="logo">
+    <h1>Edit person #{{ row.id }}</h1>
+  </header>
+  <main>
+    <form method="post" class="edit-form">
+      {% for f in fields %}
+      <label>{{ f.replace('_', ' ').title() }}
+        <input name="{{ f }}"
+               {% if f == 'start_date' %}type="date"{% elif f == 'email' %}type="email"{% endif %}
+               value="{{ row[f] or '' }}" {% if f == 'name' %}required{% endif %}>
+      </label>
+      {% endfor %}
+      <div class="buttons">
+        <button type="submit">Save</button>
+        <a href="{{ url_for('index') }}">Cancel</a>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
