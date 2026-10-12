@@ -1,0 +1,18 @@
+# Gives the database a stable DNS name: <release>-db
+# The web pods connect to it on port 5432. Internal only (not exposed outside the cluster).
+# "Headless" (clusterIP: None) is the standard pairing for a StatefulSet.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "webapp.dbFullname" . }}
+  labels:
+    {{- include "webapp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  clusterIP: None
+  selector:
+    {{- include "webapp.dbSelectorLabels" . | nindent 4 }}
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

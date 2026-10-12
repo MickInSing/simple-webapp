@@ -1,15 +1,17 @@
+# The WEB tier: stateless, so it can have several replicas and rolling updates.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "webapp.fullname" . }}
   labels:
     {{- include "webapp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
 spec:
-  replicas: {{ .Values.replicaCount }}
-  # Recreate = stop the old pod before starting the new one.
-  # Needed because only one pod at a time can mount the ReadWriteOnce DB volume.
+  replicas: {{ .Values.web.replicaCount }}
+  # RollingUpdate = start new pods before stopping old ones (zero downtime).
+  # Possible now that the pod has no database volume attached.
   strategy:
-    type: Recreate
+    type: RollingUpdate
   selector:
     matchLabels:
       {{- include "webapp.selectorLabels" . | nindent 6 }}
@@ -17,12 +19,24 @@ spec:
     metadata:
       labels:
         {{- include "webapp.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: web
       annotations:
-        # Restart pods automatically when the secret changes
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+      # Init containers run to completion BEFORE the main container starts.
+      # This one waits until the database pod is accepting connections.
+      initContainers:
+        - name: wait-for-db
+          image: "{{ .Values.db.image.repository }}:{{ .Values.db.image.tag }}"
+          imagePullPolicy: {{ .Values.db.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - until pg_isready -h "$DB_HOST" -p 5432; do echo "waiting for $DB_HOST"; sleep 2; done
+          env:
+            - name: DB_HOST
+              value: {{ include "webapp.dbFullname" . }}
       containers:
-        # ---------------- Container 1: the web app ----------------
         - name: web
           image: "{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
           imagePullPolicy: {{ .Values.web.image.pullPolicy }}
@@ -32,8 +46,11 @@ spec:
           env:
             - name: APP_TITLE
               value: {{ .Values.appTitle | quote }}
+            - name: BANNER_IMAGE
+              value: {{ .Values.bannerImage | quote }}
             - name: DB_HOST
-              value: "127.0.0.1"          # same pod = same network namespace
+              # The database Service's DNS name (was 127.0.0.1 when it shared the pod)
+              value: {{ include "webapp.dbFullname" . }}
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
@@ -52,36 +69,3 @@ spec:
             periodSeconds: 10
           resources:
             {{- toYaml .Values.web.resources | nindent 12 }}
-
-        # ---------------- Container 2: the database ----------------
-        - name: db
-          image: "{{ .Values.db.image.repository }}:{{ .Values.db.image.tag }}"
-          imagePullPolicy: {{ .Values.db.image.pullPolicy }}
-          ports:
-            - name: postgres
-              containerPort: 5432
-          envFrom:
-            - secretRef:
-                name: {{ include "webapp.fullname" . }}-db
-          env:
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata   # subfolder avoids "lost+found" issues
-          readinessProbe:
-            exec:
-              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          volumeMounts:
-            - name: db-data
-              mountPath: /var/lib/postgresql/data
-          resources:
-            {{- toYaml .Values.db.resources | nindent 12 }}
-
-      volumes:
-        - name: db-data
-          {{- if .Values.persistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ include "webapp.fullname" . }}-db-data
-          {{- else }}
-          emptyDir: {}
-          {{- end }}

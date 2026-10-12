@@ -1,6 +1,6 @@
 apiVersion: v2
 name: webapp
-description: Simple Flask web app with a PostgreSQL sidecar in the same pod
+description: Simple Flask web app with PostgreSQL in its own StatefulSet pod
 type: application
-version: 0.1.0        # version of the CHART (bump when you change templates)
-appVersion: "1.0.0"   # version of the APP image
+version: 0.2.0        # version of the CHART (bump when you change templates)
+appVersion: "1.1.0"   # version of the APP image
