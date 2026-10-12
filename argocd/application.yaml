@@ -7,7 +7,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_GITHUB_USER/webapp.git   # <-- CHANGE THIS
+    repoURL: https://github.com/MickInSing/simple-webapp.git   # <-- CHANGE THIS
     targetRevision: main
     path: helm/webapp
     helm:
